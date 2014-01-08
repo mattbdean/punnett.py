@@ -30,6 +30,7 @@ bbrr: 1 (1/8)
 from sys import stdout, stderr
 from collections import OrderedDict
 from argparse import ArgumentParser
+from pprint import pprint
 
 class PunnetGenerator:
 	def generate(self, first, second):
@@ -39,18 +40,30 @@ class PunnetGenerator:
 		lensecond = len(second)
 		if lenfirst != lensecond:
 			raise ValueError("The length of the first string must be equal to the length of the second")
+		# Check for genotypes of odd lengths
 		if lenfirst % 2 != 0:
-			# Odd number
 			raise ValueError("The first string must be even in length")
 		if lensecond % 2 != 0:
 			raise ValueError("The second string must be even in length")
-
-		column_headers = [first[0], first[1]]
-		row_headers = [second[0], second[1]]
 		
+		column_headers = None
+		row_headers = None
+		geno_count = lenfirst / 2
+		if geno_count < 1:
+			raise ValueError("Genotype count cannot be less than one")
+
+		if geno_count == 1:
+			# Monohybrid
+			column_headers = [first[0], first[1]]
+			row_headers = [second[0], second[1]]
+		if geno_count == 2:
+			# Dihybrid
+			# FOIL the parents
+			column_headers = self._foil(first)
+			row_headers = self._foil(second)
 		if len(column_headers) != len(row_headers):
 			raise ValueError("Column and row headers were not of equal sizes")
-
+		
 		grid_size = len(column_headers)
 		
 		# http://stackoverflow.com/a/1805540/1275092
@@ -73,6 +86,16 @@ class PunnetGenerator:
 		self.print_table(data, column_headers, row_headers)
 		stdout.write("\n")
 		self.print_stats(data)
+	
+	def _foil(self, geno):
+		terms = []
+		first = geno[:2]
+		second = geno[2:]
+
+		for i in first:
+			for j in second:
+				terms.append(i + j)
+		return terms
 
 
 	def print_table(self, data, column_headers, row_headers):
