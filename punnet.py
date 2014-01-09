@@ -56,7 +56,7 @@ class PunnetGenerator:
 			# Monohybrid
 			column_headers = [first[0], first[1]]
 			row_headers = [second[0], second[1]]
-		if geno_count == 2:
+		elif geno_count == 2:
 			# Dihybrid
 			# FOIL the parents
 			column_headers = self._foil(first)
@@ -103,36 +103,57 @@ class PunnetGenerator:
 		if cell_size % 2 != 0:
 			raise ValueError("Cell size must be even")
 		header_length = int(cell_size / 2)
-		total_grid_size = 0
+		column_header_offset = header_length + 1
+		column_grid_indicies = [0]
+
+		# Top grid line
+		self._write_spaces(column_header_offset)
+		column_grid_indicies.append(column_grid_indicies[-1] + header_length + 1)
+		for col in column_headers:
+			stdout.write("+")
+			self._write_char(cell_size, "-")
+			column_grid_indicies.append(column_grid_indicies[-1] + cell_size + 1)
+			
+		stdout.write("+\n")
+		total_grid_size = column_header_offset + 1 + cell_size
 	
 		# Create the empty space at the top left of the grid
-		self._write_spaces(header_length)
-		total_grid_size += header_length
+		self._write_spaces(column_header_offset)
 		
 		# Draw the column headers
 		for col in column_headers:
-			stdout.write("|" + col)
+			stdout.write("|")
+			stdout.write(col)
 			self._write_spaces(header_length)
-			total_grid_size += len("|" + col) + header_length
+			total_grid_size += len(col) + header_length
 		# End the column headers
 		stdout.write("|\n")
 		total_grid_size += 1
 		
 		# Draw the line separating the column headers from the data
-		for i in range(total_grid_size):
-			stdout.write("-")
-		stdout.write("\n")
+		self._hor_grid_line(column_grid_indicies, total_grid_size)
 
 		# Draw each row out
 		for i, row in enumerate(data):
-			# Column header
-			stdout.write(row_headers[i] + "|")
+			# Row header
+			stdout.write("|" + row_headers[i] + "|")
 		
 			# Write the data
 			for cell in row:
 				stdout.write(cell + "|")
 
 			stdout.write("\n")
+
+		# Final encapsulating grid line
+		self._hor_grid_line(column_grid_indicies, total_grid_size)
+	
+	def _hor_grid_line(self, indicies, total_length):
+		for i in range(total_length - 1):
+			if i in indicies:
+				stdout.write("+")
+			else:
+				stdout.write("-")
+		stdout.write("\n")
 	
 	def print_stats(self, data):
 		# Dictionary of cells and their amount of appearances in the table
@@ -155,9 +176,11 @@ class PunnetGenerator:
 			stdout.write("{}: {} ({})\n".format(genotype, count, (str(count)) + "/" + str(total_items)))
 
 	def _write_spaces(self, count):
-		for i in range(count):
-			stdout.write(" ")
-
+		self._write_char(count, " ")
+	
+	def _write_char(self, count, char):
+		for i in range(count):	
+			stdout.write(char)
 
 def main():
 	parser = ArgumentParser()
