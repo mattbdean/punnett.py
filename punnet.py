@@ -35,7 +35,7 @@ from fractions import Fraction
 
 class PunnetGenerator:
 	def generate(self, mommy, daddy):
-		mommy = mommy.strip()
+		mommy = mommy.strip() # Make it rain
 		daddy = daddy.strip()
 		len_mommy = len(mommy)
 		len_daddy = len(daddy)
