@@ -31,6 +31,7 @@ from sys import stdout, stderr
 from collections import OrderedDict
 from argparse import ArgumentParser
 from pprint import pprint
+from fractions import Fraction
 
 class PunnetGenerator:
 	def generate(self, first, second):
@@ -173,7 +174,8 @@ class PunnetGenerator:
 		stats = OrderedDict(sorted(stats.items()))
 		total_items = sum(stats.values())
 		for genotype, count in stats.items():
-			stdout.write("{}: {} ({})\n".format(genotype, count, (str(count)) + "/" + str(total_items)))
+			frac = Fraction(count, total_items)
+			stdout.write("{}: {} ({})\n".format(genotype, count, str(frac.numerator) + "/" + str(frac.denominator)))
 
 	def _write_spaces(self, count):
 		self._write_char(count, " ")
