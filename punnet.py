@@ -34,34 +34,34 @@ from pprint import pprint
 from fractions import Fraction
 
 class PunnetGenerator:
-	def generate(self, first, second):
-		first = first.strip()
-		second = second.strip()
-		lenfirst = len(first)
-		lensecond = len(second)
-		if lenfirst != lensecond:
-			raise ValueError("The length of the first string must be equal to the length of the second")
+	def generate(self, mommy, daddy):
+		mommy = mommy.strip()
+		daddy = daddy.strip()
+		len_mommy = len(mommy)
+		len_daddy = len(daddy)
+		if len_mommy != len_daddy:
+			raise ValueError("The length of the mother's genotype must be equal to the father's")
 		# Check for genotypes of odd lengths
-		if lenfirst % 2 != 0:
-			raise ValueError("The first string must be even in length")
-		if lensecond % 2 != 0:
-			raise ValueError("The second string must be even in length")
+		if len_mommy % 2 != 0:
+			raise ValueError("The mommy genotype must be even in length")
+		if len_daddy % 2 != 0:
+			raise ValueError("The daddy genotype must be even in length")
 		
 		column_headers = None
 		row_headers = None
-		geno_count = lenfirst / 2
+		geno_count = len_mommy / 2
 		if geno_count < 1:
 			raise ValueError("Genotype count cannot be less than one")
 
 		if geno_count == 1:
 			# Monohybrid
-			column_headers = [first[0], first[1]]
-			row_headers = [second[0], second[1]]
+			column_headers = [mommy[0], mommy[1]]
+			row_headers = [daddy[0], daddy[1]]
 		elif geno_count == 2:
 			# Dihybrid
-			# FOIL the parents
-			column_headers = self._foil(first)
-			row_headers = self._foil(second)
+			# FOIL the parents to get row and column headers
+			column_headers = self._foil(mommy)
+			row_headers = self._foil(daddy)
 		if len(column_headers) != len(row_headers):
 			raise ValueError("Column and row headers were not of equal sizes")
 		
@@ -90,11 +90,11 @@ class PunnetGenerator:
 	
 	def _foil(self, geno):
 		terms = []
-		first = geno[:2]
-		second = geno[2:]
+		mommy = geno[:2]
+		daddy = geno[2:]
 
-		for i in first:
-			for j in second:
+		for i in mommy:
+			for j in daddy:
 				terms.append(i + j)
 		return terms
 
@@ -186,12 +186,12 @@ class PunnetGenerator:
 
 def main():
 	parser = ArgumentParser()
-	parser.add_argument("first", help="the first genotype to cross")
-	parser.add_argument("second", help="the second genotype to cross")
+	parser.add_argument("mommy", help="the first genotype to cross")
+	parser.add_argument("daddy", help="the second genotype to cross")
 	args = parser.parse_args()
 
 	gen = PunnetGenerator()
-	gen.generate(args.first, args.second)
+	gen.generate(args.mommy, args.daddy)
 
 if __name__ == "__main__":
 	main()
