@@ -4,26 +4,28 @@
 
 Sample Input:
 
-BbRr BbRr
+AaBb
 
 Sample output:
 
-  |BR  |Br  |bR  |br  |
-=======================
-BR|BBRR|BBRr|BbRR|BbRr|
-Br|BBRr|BBRR|BbRr|Bbrr|
-bR|BbRr|BbRr|bbRR|bbRr|
-br|BbRr|Bbrr|bbRr|bbrr|
+   +----+----+----+----+
+   |AB  |Ab  |ab  |aB  |
++--+----+----+----+----+
+|AB|AABB|AABb|ABab|ABBa|
+|Ab|AABb|AAbb|Aabb|ABab|
+|ab|ABab|Aabb|aabb|Baab|
+|aB|ABBa|ABab|Baab|BBaa|
++--+----+----+----+----+
 
-BBRR: 1 (1/16)
-BBRr: 2 (1/8)
-BbRR: 2 (1/8)
-BbRr: 4 (1/4)
-BBrr: 1 (1/16)
-Bbrr: 2 (1/8)
-bbRR: 1 (1/16)
-bbRr: 2 (1/8)
-bbrr: 1 (1/8)
+AABB: 1 (1/16)
+AABb: 2 (1/8)
+AAbb: 1 (1/16)
+ABBa: 2 (1/8)
+ABab: 4 (1/4)
+Aabb: 2 (1/8)
+BBaa: 1 (1/16)
+Baab: 2 (1/8)
+aabb: 1 (1/16)
 
 """
 
