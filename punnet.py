@@ -27,6 +27,8 @@ bbrr: 1 (1/8)
 
 """
 
+import os.path
+import json
 from sys import stdout, stderr
 from collections import OrderedDict
 from argparse import ArgumentParser
@@ -34,6 +36,13 @@ from pprint import pprint
 from fractions import Fraction
 
 class PunnetGenerator:
+	def __init__(self, debug):
+		self.debug = debug
+
+	def d(self, msg):
+		if self.debug:
+			pprint(msg)
+
 	def generate(self, mommy, daddy):
 		mommy = mommy.strip() # Make it rain
 		daddy = daddy.strip()
@@ -53,15 +62,21 @@ class PunnetGenerator:
 		if geno_count < 1:
 			raise ValueError("Genotype count cannot be less than one")
 
+		column_headers = None
+		row_headers = None
+
 		if geno_count == 1:
 			# Monohybrid
 			column_headers = [mommy[0], mommy[1]]
 			row_headers = [daddy[0], daddy[1]]
-		elif geno_count == 2:
-			# Dihybrid
-			# FOIL the parents to get row and column headers
-			column_headers = self._foil(mommy)
-			row_headers = self._foil(daddy)
+		else:
+			# Dihybrid and up
+			column_headers = self._generate_headers(mommy)
+			row_headers = self._generate_headers(daddy)
+
+		if len(column_headers) != len(row_headers):
+			raise ValueError("Column and row headers were not of equal sizes")
+
 		if len(column_headers) != len(row_headers):
 			raise ValueError("Column and row headers were not of equal sizes")
 		
@@ -88,20 +103,52 @@ class PunnetGenerator:
 		stdout.write("\n")
 		self.print_stats(data)
 	
-	def _foil(self, geno):
+	def _generate_headers(self, geno):
 		terms = []
-		mommy = geno[:2]
-		daddy = geno[2:]
+		if not self._is_even(len(geno)):
+			raise ValueError("Genotype length must be even")
 
-		for i in mommy:
-			for j in daddy:
-				terms.append(i + j)
+		# Split the string into an array of strings 2 chars long
+		# http://stackoverflow.com/a/9475354/1275092
+		gametes = [list(geno[i:i + 2]) for i in range(0, len(geno), 2)]
+		# An array of array of integers (1 or 0) corresponding to 'gametes'
+		counters = [[1, 0] for i in range(len(gametes))]
+		back_counter = len(gametes) - 1
+		
+		for unused in range(2 ** len(gametes)):
+			self.d(gametes)
+			self.d(counters)
+			# Extract the gametes where its index in 'counters' is 1
+			term = ""
+			for i, array in enumerate(counters):
+				for j in array:
+					if array[j] == 1:
+						term += gametes[i][j]
+			self.d(term)
+			terms.append(term)
+			
+			counters[-back_counter][0] = self._flip(counters[-back_counter][0])
+			counters[-back_counter][1] = self._flip(counters[-back_counter][1])
+			back_counter -= 1
+			if back_counter == -1:
+				back_counter = len(gametes) - 1
 		return terms
+	
+	def _flip(self, num):
+		# Flips 1 and 0
+		if num != 1 and num != 0:
+			raise ValueError("num must be either 1 or 0")
+	
+		return 0 if num == 1 else 1
+
+	
+	def _is_even(self, num):
+		return num % 2 == 0
 
 
 	def print_table(self, data, column_headers, row_headers):
 		cell_size = len(data[0][0])
-		if cell_size % 2 != 0:
+		if not self._is_even(cell_size):
 			raise ValueError("Cell size must be even")
 		header_length = int(cell_size / 2)
 		column_header_offset = header_length + 1
@@ -190,7 +237,15 @@ def main():
 	parser.add_argument("daddy", help="the second genotype to cross")
 	args = parser.parse_args()
 
-	gen = PunnetGenerator()
+	debug = False
+	# Load extra properties
+	if os.path.isfile('cfg.json'):
+		with open('cfg.json', 'r') as config_file:
+			config = json.load(config_file)
+			if "debug" in config:
+				debug = config["debug"]
+
+	gen = PunnetGenerator(debug)
 	gen.generate(args.mommy, args.daddy)
 
 if __name__ == "__main__":
